@@ -4,9 +4,9 @@ project(GameEngine)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES main.cpp)
-add_executable(GameEngine ${SOURCE_FILES})
+add_executable(out ${SOURCE_FILES})
 
-target_link_libraries(GameEngine glfw)
-target_link_libraries(GameEngine GLEW)
-target_link_libraries(GameEngine ${OPENGL_gl_LIBRARY})
+target_link_libraries(out glfw)
+target_link_libraries(out GLEW)
+target_link_libraries(out ${OPENGL_gl_LIBRARY})
 
