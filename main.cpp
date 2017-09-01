@@ -44,7 +44,7 @@ int main() {
 
     glViewport(0, 0, screenWidth, screenHeight);
 
-    Shader shader("resources/shaders/core.vs", "resources/shaders/core.frag");
+    Shader shader("resources/shaders/core.vert", "resources/shaders/core.frag");
 
     GLfloat vertices[] = 
     {
@@ -67,6 +67,7 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid * ) ( 3 * sizeof(GLfloat)) );
     glEnableVertexAttribArray(1);
 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     while( !glfwWindowShouldClose(m_Window))
