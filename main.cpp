@@ -1,6 +1,8 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "shader.h"
 
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -27,8 +29,7 @@ int main() {
     glfwGetFramebufferSize(m_Window, &screenWidth, &screenHeight);
 
 
-    if (m_Window == nullptr)
-    {
+    if (m_Window == nullptr) {
         std::cout << "Failed to initialize GLFW" << std::endl;
         glfwTerminate();
         return -1;
@@ -36,8 +37,7 @@ int main() {
     glfwMakeContextCurrent(m_Window);
     glewExperimental = GL_TRUE;
 
-    if ( GLEW_OK != glewInit())
-    {
+    if (GLEW_OK != glewInit()) {
         std::cout << "Failed to initialize GLEW" << std::endl;
         return -1;
     }
@@ -45,30 +45,67 @@ int main() {
     glViewport(0, 0, screenWidth, screenHeight);
 
     Shader shader("resources/shaders/core.vert", "resources/shaders/core.frag");
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GLfloat vertices[] = 
+    GLfloat vertices[] =
     {
-        //position          //color
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left 
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,// bottom right
-        0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f // middle top
+        //position              //color             // Texture Coordinates
+        0.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,      1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // bottom lef
+        -0.5f, 0.5f, 0.0f,     1.0f, 0.0f, 1.0f,   0.0f, 1.0f // bottom lef
     };
 
-    GLuint VBO, VAO;
+    GLuint indices[] =
+    {
+        0, 1, 3,
+        1, 2, 3,
+    };
+
+    GLuint VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
     glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid * ) 0 );
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid * ) 0 );
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid * ) ( 3 * sizeof(GLfloat)) );
+    // Color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid * ) ( 3 * sizeof(GLfloat)) );
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // Texture
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid * ) ( 6 * sizeof(GLfloat)) );
+    glEnableVertexAttribArray(2);
+
     glBindVertexArray(0);
+
+    GLuint texture;
+    int width, height, bpp;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    unsigned char *image = stbi_load("resources/images/2.jpg", &width, &height, &bpp, 4);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(image);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     while( !glfwWindowShouldClose(m_Window))
     {
@@ -77,14 +114,20 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(glGetUniformLocation(shader.Program, "ourTexture"), 0);
+
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glfwSwapBuffers(m_Window);
     }
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
