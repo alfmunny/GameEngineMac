@@ -1,6 +1,10 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "shader.h"
@@ -100,8 +104,9 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    unsigned char *image = stbi_load("resources/images/2.jpg", &width, &height, &bpp, 4);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *image = stbi_load("resources/images/2.jpg", &width, &height, &bpp, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(image);
@@ -114,6 +119,14 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.use();
+
+        glm::mat4 transform;
+        transform = glm::translate(transform, glm::vec3(0.5f, 0.5f, 0.0f));
+        transform = glm::rotate(transform, (GLfloat)glfwGetTime() *  -5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+
+        GLint transformLocation = glGetUniformLocation(shader.Program, "transform");
+        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(glGetUniformLocation(shader.Program, "ourTexture"), 0);

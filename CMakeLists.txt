@@ -17,9 +17,11 @@ link_directories(/usr/local/lib)
 
 find_package (OpenGL REQUIRED)
 find_package (glfw3 REQUIRED)
+find_package (glm REQUIRED)
 find_package (GLEW REQUIRED STATIC)
 
 target_link_libraries(out glfw)
 target_link_libraries(out GLEW)
+target_link_libraries(out glm)
 target_link_libraries(out ${OPENGL_gl_LIBRARY})
 
