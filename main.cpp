@@ -124,8 +124,22 @@ int main() {
         transform = glm::translate(transform, glm::vec3(0.5f, 0.5f, 0.0f));
         transform = glm::rotate(transform, (GLfloat)glfwGetTime() *  -5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
-        GLint transformLocation = glGetUniformLocation(shader.Program, "transform");
-        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+        glm::mat4 model;
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4 view;
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
+
+        int modelLoc = glGetUniformLocation(shader.Program, "model");
+        int viewLoc = glGetUniformLocation(shader.Program, "view");
+        int projectionLoc = glGetUniformLocation(shader.Program, "projection");
+
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
