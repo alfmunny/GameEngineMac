@@ -3,7 +3,10 @@ project(GameEngine)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp shader.h stb_image.h)
+include_directories(lib)
+
+set(SOURCE_FILES main.cpp shader.h stb_image.h lib/imgui.h lib/imgui.cpp lib/imconfig.h lib/stb_textedit.h
+        lib/imgui_internal.h lib/imgui_draw.cpp lib/stb_rect_pack.h lib/stb_truetype.h imgui_impl_glfw_gl3.h imgui_impl_glfw_gl3.cpp)
 
 add_executable(out ${SOURCE_FILES})
 

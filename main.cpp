@@ -8,6 +8,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "shader.h"
+#include "lib/imgui.h"
+#include "imgui_impl_glfw_gl3.h"
+
+
 
 const GLint WIDTH = 800, HEIGHT = 600;
 
@@ -45,6 +49,8 @@ int main() {
         std::cout << "Failed to initialize GLEW" << std::endl;
         return -1;
     }
+
+    ImGui_ImplGlfwGL3_Init(m_Window, true);
 
     glViewport(0, 0, screenWidth, screenHeight);
 
@@ -111,23 +117,36 @@ int main() {
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(image);
     glBindTexture(GL_TEXTURE_2D, 0);
+    bool show_test_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImColor(114, 144, 154);
+
+
+    float x_r = 0.55f;
+    float y_r = 0.0f;
+    float z_r = 0.0f;
+
+    float x_view = 0.0f;
+    float y_view = 0.0f;
+    float z_view = -3.0f;
 
     while( !glfwWindowShouldClose(m_Window))
     {
         glfwPollEvents();
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.use();
 
-        glm::mat4 transform;
-        transform = glm::translate(transform, glm::vec3(0.5f, 0.5f, 0.0f));
-        transform = glm::rotate(transform, (GLfloat)glfwGetTime() *  -5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
         glm::mat4 model;
-        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(x_r*(-100)), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(y_r*(-100)), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(z_r*(-100)), glm::vec3(0.0f, 0.0f, 1.0f));
+
         glm::mat4 view;
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::translate(view, glm::vec3(x_view, y_view, z_view));
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(45.0f), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
@@ -136,9 +155,14 @@ int main() {
         int viewLoc = glGetUniformLocation(shader.Program, "view");
         int projectionLoc = glGetUniformLocation(shader.Program, "projection");
 
+        GLint color = glGetUniformLocation(shader.Program, "newColor");
+
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        float newColor[4] = { clear_color.x, clear_color.y, clear_color.z, clear_color.w};
+        glProgramUniform4fv(shader.Program, color, 1, newColor);
 
 
         glActiveTexture(GL_TEXTURE0);
@@ -150,12 +174,32 @@ int main() {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
+        ImGui_ImplGlfwGL3_NewFrame();
+
+        {
+            ImGui::Text("Hello, world!");
+            ImGui::SliderFloat("x - rotate", &x_r, 0.0f, 1.0f);
+            ImGui::SliderFloat("y - rotate", &y_r, 0.0f, 1.0f);
+            ImGui::SliderFloat("z - rotate", &z_r, 0.0f, 1.0f);
+
+            ImGui::SliderFloat("x - view", &x_view, -1.0f, 1.0f);
+            ImGui::SliderFloat("y - view", &y_view, -1.0f, 1.0f);
+            ImGui::SliderFloat("z - view", &z_view, -10.0f, 0.0f);
+
+            ImGui::ColorEdit3("clear color", (float*)&clear_color);
+            if (ImGui::Button("Test Window")) show_test_window ^= 1;
+            if (ImGui::Button("Another Window")) show_another_window ^= 1;
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+
+        ImGui::Render();
+
         glfwSwapBuffers(m_Window);
     }
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-
+    ImGui_ImplGlfwGL3_Shutdown();
     glfwTerminate();
     return 0;
 }
