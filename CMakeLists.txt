@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories(lib)
 
 set(SOURCE_FILES main.cpp shader.h stb_image.h lib/imgui.h lib/imgui.cpp lib/imconfig.h lib/stb_textedit.h
-        lib/imgui_internal.h lib/imgui_draw.cpp lib/stb_rect_pack.h lib/stb_truetype.h imgui_impl_glfw_gl3.h imgui_impl_glfw_gl3.cpp)
+        lib/imgui_internal.h lib/imgui_draw.cpp lib/stb_rect_pack.h lib/stb_truetype.h imgui_impl_glfw_gl3.h imgui_impl_glfw_gl3.cpp ui/debug.h ui/debug.cpp models/model.h)
 
 add_executable(out ${SOURCE_FILES})
 

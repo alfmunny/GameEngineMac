@@ -13,7 +13,7 @@
 
 
 
-const GLint WIDTH = 800, HEIGHT = 600;
+const GLint WIDTH = 1200, HEIGHT = 800;
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
@@ -57,14 +57,51 @@ int main() {
     Shader shader("resources/shaders/core.vert", "resources/shaders/core.frag");
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    glEnable(GL_DEPTH_TEST);
     GLfloat vertices[] =
     {
         //position              //color             // Texture Coordinates
-        0.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-        0.5f, -0.5f, 0.0f,      1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // bottom lef
-        -0.5f, 0.5f, 0.0f,     1.0f, 0.0f, 1.0f,   0.0f, 1.0f // bottom lef
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
     GLuint indices[] =
@@ -87,15 +124,11 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid * ) 0 );
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid * ) 0 );
     glEnableVertexAttribArray(0);
 
-    // Color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid * ) ( 3 * sizeof(GLfloat)) );
-    glEnableVertexAttribArray(1);
-
     // Texture
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid * ) ( 6 * sizeof(GLfloat)) );
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid * ) ( 3 * sizeof(GLfloat)) );
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
@@ -111,7 +144,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *image = stbi_load("resources/images/2.jpg", &width, &height, &bpp, 0);
+    unsigned char *image = stbi_load("resources/images/1.jpg", &width, &height, &bpp, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -129,21 +162,26 @@ int main() {
     float x_view = 0.0f;
     float y_view = 0.0f;
     float z_view = -3.0f;
+    bool is_rotate = false;
 
     while( !glfwWindowShouldClose(m_Window))
     {
         glfwPollEvents();
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
-
 
         glm::mat4 model;
         model = glm::rotate(model, glm::radians(x_r*(-100)), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(y_r*(-100)), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(z_r*(-100)), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        if (is_rotate)
+        {
+            model = glm::rotate(model, (float)glfwGetTime() * glm::radians(55.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        }
 
         glm::mat4 view;
         view = glm::translate(view, glm::vec3(x_view, y_view, z_view));
@@ -170,8 +208,8 @@ int main() {
         glUniform1i(glGetUniformLocation(shader.Program, "ourTexture"), 0);
 
         glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         ImGui_ImplGlfwGL3_NewFrame();
@@ -185,6 +223,8 @@ int main() {
             ImGui::SliderFloat("x - view", &x_view, -1.0f, 1.0f);
             ImGui::SliderFloat("y - view", &y_view, -1.0f, 1.0f);
             ImGui::SliderFloat("z - view", &z_view, -10.0f, 0.0f);
+
+            ImGui::Checkbox("rotate", &is_rotate);
 
             ImGui::ColorEdit3("clear color", (float*)&clear_color);
             if (ImGui::Button("Test Window")) show_test_window ^= 1;
